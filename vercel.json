@@ -1,6 +1,6 @@
 {
   "buildCommand": "echo 'Static PWA - no build needed'",
-  "outputDirectory": "public",
+  "outputDirectory": ".",
   "env": {
     "NEXT_PUBLIC_AGENCY_NAME": "Bonifacio & Fils Immobilier",
     "NEXT_PUBLIC_AGENCY_SIREN": "904719879"
