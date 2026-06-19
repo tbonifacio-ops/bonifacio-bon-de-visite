@@ -1,0 +1,37 @@
+{
+  "name": "bonifacio-bons-de-visite",
+  "version": "1.1.0",
+  "description": "PWA pour générer des certificats de visite signés - Bonifacio & Fils Immobilier",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python3 -m http.server 3000 --directory .",
+    "build": "echo 'Static PWA - no build needed'",
+    "preview": "python3 -m http.server 8080 --directory ."
+  },
+  "keywords": [
+    "pwa",
+    "real-estate",
+    "immobilier",
+    "certificate",
+    "visite",
+    "signature",
+    "geolocation",
+    "pdf"
+  ],
+  "author": "Bonifacio & Fils Immobilier",
+  "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/bonifacio-bons-de-visite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/bonifacio-bons-de-visite/issues"
+  },
+  "homepage": "https://bonifaciofils.com",
+  "devDependencies": {},
+  "dependencies": {}
+}

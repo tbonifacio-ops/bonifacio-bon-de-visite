@@ -1,0 +1,43 @@
+User-agent: *
+Disallow: /
+Disallow: /app.js
+Disallow: /sw.js
+
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: LinkedInBot
+Disallow: /
+
+User-agent: TwitterBot
+Disallow: /
+
+# Specific rules
+Disallow: /*.json$
+Disallow: /api/
+Disallow: /admin/
+Disallow: /user/
+
+# Allow service worker access only
+Allow: /sw.js
+Allow: /manifest.json
+
+Crawl-delay: 0

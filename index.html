@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#F8F5F0">
+    <meta name="description" content="Générateur de certificats de visite - Bonifacio & Fils Immobilier">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bons de Visite">
+    
+    <title>Bons de Visite - Bonifacio & Fils</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo-192.png">
+    <link rel="icon" type="image/png" href="logo-192.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-bg: #F8F5F0;
+            --primary-text: #2a2a2a;
+            --accent-gold: #A8895B;
+            --accent-light: #D4AF9E;
+            --border-color: #E5DDD0;
+            --success: #6B8E23;
+            --error: #A0522D;
+            --shadow: 0 2px 8px rgba(42, 42, 42, 0.1);
+            --shadow-lg: 0 8px 16px rgba(42, 42, 42, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Cormorant Garamond', serif;
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            overscroll-behavior: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body.has-notch {
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            width: 60px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* GDPR Screen */
+        .gdpr-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .gdpr-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 90%;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .gdpr-box h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--accent-gold);
+        }
+
+        .gdpr-box p {
+            font-size: 13px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #555;
+            text-align: left;
+        }
+
+        .checkbox-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            gap: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-gold);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            color: var(--accent-gold);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: white;
+            color: var(--primary-text);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Canvas Signature Pad */
+        .signature-pad {
+            border: 2px dashed var(--border-color);
+            border-radius: 4px;
+            background: white;
+            width: 100%;
+            height: 150px;
+            cursor: crosshair;
+            display: block;
+            touch-action: none;
+            margin-bottom: 10px;
+        }
+
+        .signature-hint {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-gold);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #8b7043;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-bg);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #8b4513;
+        }
+
+        /* History */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid var(--accent-gold);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
+        }
+
+        .history-item:active {
+            transform: scale(0.98);
+        }
+
+        .history-item-date {
+            font-size: 12px;
+            color: var(--accent-gold);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .history-item-title {
+            font-size: 14px;
+            margin: 8px 0 5px 0;
+            font-weight: 500;
+        }
+
+        .history-item-address {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .history-item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .history-item-actions button {
+            flex: 1;
+            max-width: none;
+            padding: 8px 12px;
+            font-size: 11px;
+        }
+
+        /* Status Messages */
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.active {
+            display: block;
+        }
+
+        .status.success {
+            background-color: #e8f5e9;
+            color: var(--success);
+            border-left: 3px solid var(--success);
+        }
+
+        .status.error {
+            background-color: #ffebee;
+            color: var(--error);
+            border-left: 3px solid var(--error);
+        }
+
+        .status.info {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border-left: 3px solid #1976d2;
+        }
+
+        /* Location Info */
+        .location-info {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .location-info .label {
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .location-info .value {
+            color: #666;
+            word-break: break-all;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+
+            .screen {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            button {
+                font-size: 13px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                max-width: none;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- GDPR Consent Screen -->
+        <div id="gdprScreen" class="screen active">
+            <div class="gdpr-box">
+                <h2>Protection de vos données</h2>
+                <p>Bonifacio & Fils Immobilier respecte vos données personnelles conformément à la CNIL et au RGPD.</p>
+                
+                <p><strong>Utilisation des données :</strong></p>
+                <p>Nous collectons votre signature et géolocalisation uniquement pour générer votre certificat de visite. Ces données sont stockées localement sur votre téléphone et supprimées automatiquement après 24 mois.</p>
+                
+                <p><strong>Base légale :</strong> Article 6.1.b du RGPD (exécution d'un contrat).</p>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="gdprConsent" required>
+                        <span>J'accepte la collecte de mes données pour la génération du certificat</span>
+                    </label>
+                </div>
+                
+                <button class="btn-primary" id="acceptGdpr" disabled>Continuer</button>
+            </div>
+        </body>
+    </div>
+
+        <!-- Main Screen -->
+        <div id="mainScreen" class="screen">
+            <div class="header">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ctext x='100' y='120' text-anchor='middle' font-size='60' font-family='serif' font-weight='bold'%3EBF%3C/text%3E%3C/svg%3E" class="logo" alt="Logo Bonifacio & Fils">
+                <h1>BONS DE VISITE</h1>
+                <p>Certificats de visite</p>
+            </div>
+
+            <div id="status" class="status"></div>
+
+            <div class="form-group">
+                <label>Lieu de la visite</label>
+                <input type="text" id="propertyAddress" placeholder="Adresse du bien" required>
+            </div>
+
+            <div class="form-group">
+                <label>Client / Visiteur</label>
+                <input type="text" id="visitorName" placeholder="Nom complet" required>
+            </div>
+
+            <div class="form-group">
+                <label>Téléphone (optionnel)</label>
+                <input type="tel" id="visitorPhone" placeholder="+33 6 XX XX XX XX">
+            </div>
+
+            <div id="locationInfo" class="location-info" style="display: none;">
+                <div class="label">📍 Localisation GPS</div>
+                <div class="value">
+                    <div id="coordsDisplay">Activation en cours...</div>
+                    <div style="font-size: 11px; margin-top: 5px; color: #999;">Précision : <span id="accuracyDisplay">-</span></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Votre signature <span style="color: var(--error);">*</span></label>
+                <div class="signature-hint">Dessinez votre signature ci-dessous</div>
+                <canvas id="signaturePad" class="signature-pad"></canvas>
+                <button class="btn-secondary" id="clearSignature" type="button">Effacer</button>
+            </div>
+
+            <div class="form-group">
+                <label>Remarques (optionnel)</label>
+                <textarea id="notes" placeholder="Observations ou détails complémentaires..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" id="viewHistory" type="button">Historique</button>
+                <button class="btn-primary" id="generatePdf" type="button">Générer PDF</button>
+            </div>
+        </div>
+
+        <!-- History Screen -->
+        <div id="historyScreen" class="screen">
+            <div class="header">
+                <h1>HISTORIQUE</h1>
+                <p>Vos certificats</p>
+            </div>
+
+            <div id="status-history" class="status"></div>
+
+            <div id="historyList" class="history-list"></div>
+
+            <div class="button-group" style="margin-top: 30px;">
+                <button class="btn-danger" id="clearHistory" type="button">Tout supprimer</button>
+                <button class="btn-secondary" id="backToMain" type="button">Retour</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => {
+                console.warn('Service Worker registration failed:', err);
+            });
+        }
+    </script>
+</body>
+</html>
